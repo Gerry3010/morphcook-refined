@@ -100,6 +100,15 @@ class _CookModeScreenState extends State<CookModeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Cook mode is dark full-bleed in both editions, so its status bar needs
+    // light icons even when the app theme is light.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: statusBarStyleOn(Brightness.dark),
+      child: _screen(context),
+    );
+  }
+
+  Widget _screen(BuildContext context) {
     final morph = MorphTheme.of(context);
     final state = context.watch<AppState>();
     final s = S(state.lang);

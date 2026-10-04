@@ -92,12 +92,17 @@ class ThemedApp extends StatelessWidget {
           ThemeMode.system =>
             MediaQuery.platformBrightnessOf(context) == Brightness.dark,
         };
-        return MorphTheme(
-          data: MorphThemeData(
-            colors: dark ? MorphColors.dark : MorphColors.light,
-            readable: profile.readableText,
+        // Default for routes without an AppBar (tabs, splash); AppBars and
+        // the always-dark cook mode annotate their own status bar.
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: statusBarStyleOn(dark ? Brightness.dark : Brightness.light),
+          child: MorphTheme(
+            data: MorphThemeData(
+              colors: dark ? MorphColors.dark : MorphColors.light,
+              readable: profile.readableText,
+            ),
+            child: child!,
           ),
-          child: child!,
         );
       },
       home: const _Root(),
