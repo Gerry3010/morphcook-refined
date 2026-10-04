@@ -19,7 +19,9 @@
 > `morphcook/pdf_import` channel (same limits and error codes as the Android
 > PDFBox extractor, covered by XCTests), UIScene lifecycle, the real app icon,
 > a light/dark launch screen, EN/DE localization, a privacy manifest and the
-> bundle ID `net.geraldhofbauer.morphcook`.
+> bundle ID `net.geraldhofbauer.morphcook`. Shared code now names AirDrop
+> instead of Bluetooth/Quick Share on iOS, lists the iOS pods' licenses, and
+> keeps status-bar icons legible on every screen (on Android too).
 >
 > **Known iOS differences:** PDFKit can merge tightly-leaded lines (e.g. plain
 > text-to-PDF output), so such PDFs may fall back to the unstructured-text
