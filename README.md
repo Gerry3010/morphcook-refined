@@ -92,6 +92,7 @@ Share one recipe from its details or the whole cookbook from the sharing screen.
 The ZIP includes readable text and importable recipe data, with optional photos.
 Recipients preview additions; their profile, plans and history stay private.
 Android offers Bluetooth, Quick Share and other installed compatible apps.
+iOS offers AirDrop, Save to Files and other apps in the share sheet.
 
 ## PDF import, manual and feedback
 
