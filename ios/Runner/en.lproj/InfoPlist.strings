@@ -1,0 +1,2 @@
+/* Shown when iOS asks for photo access while attaching a recipe photo. */
+"NSPhotoLibraryUsageDescription" = "MorphCook only reads the photo you pick to attach it to a recipe.";
