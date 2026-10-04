@@ -14,6 +14,7 @@ import '../../logic/local_file_bytes.dart';
 import '../strings.dart';
 import '../theme.dart';
 import '../widgets/decor.dart';
+import '../widgets/share_origin.dart';
 import 'faq_screen.dart';
 import 'feedback_screen.dart';
 import 'insights_screen.dart';
@@ -275,10 +276,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
 
           SectionHeader(title: s('backup')),
-          _linkRow(
-            Icons.ios_share,
-            s('exportBackup'),
-            () => _exportBackup(state, s),
+          Builder(
+            builder: (row) => _linkRow(
+              Icons.ios_share,
+              s('exportBackup'),
+              () => _exportBackup(state, s, shareOriginOf(row)),
+            ),
           ),
           _linkRow(
             Icons.download_outlined,
@@ -617,13 +620,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // ---- backup ----
 
-  Future<void> _exportBackup(AppState state, S s) async {
-    // iPad presents the share sheet as a popover, which needs an anchor;
-    // without one share_plus refuses and the export reports a failure.
-    final renderBox = context.findRenderObject();
-    final origin = renderBox is RenderBox && renderBox.hasSize
-        ? renderBox.localToGlobal(Offset.zero) & renderBox.size
-        : const Rect.fromLTWH(0, 0, 1, 1);
+  /// [origin] is the tapped row: iPad presents the share sheet as a popover
+  /// anchored there; without an anchor share_plus refuses to share.
+  Future<void> _exportBackup(AppState state, S s, Rect origin) async {
     // Do not let stale-cache cleanup overlap creation of this export.
     await _startupCleanup;
     if (!mounted) return;

@@ -26,13 +26,21 @@ void main() {
       temp.deleteSync(recursive: true);
     });
 
-    await openBackupExportPrompt(tester);
+    final row = await openBackupExportPrompt(tester);
     await tester.tap(find.text('ok')); // no password: no confirmation prompt
     await settleRealAsync(tester, () => shared != null);
 
-    // share_plus refuses on iPad without a non-empty popover anchor.
+    // share_plus refuses on iPad without an anchor, and a whole-screen anchor
+    // leaves the popover squeezed against an edge: it must be the tapped row.
     expect(shared, isNotNull);
-    expect(shared!['originWidth'] as double, greaterThan(0));
-    expect(shared!['originHeight'] as double, greaterThan(0));
+    expect(
+      Rect.fromLTWH(
+        shared!['originX'] as double,
+        shared!['originY'] as double,
+        shared!['originWidth'] as double,
+        shared!['originHeight'] as double,
+      ),
+      row,
+    );
   });
 }

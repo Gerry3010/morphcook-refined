@@ -23,9 +23,10 @@ Future<void> settleRealAsync(WidgetTester tester, bool Function() done) async {
   }
 }
 
-/// Pumps Settings and opens the first backup-export password prompt. Export
-/// awaits the screen's cache cleanup, which runs outside the fake clock.
-Future<void> openBackupExportPrompt(WidgetTester tester) async {
+/// Pumps Settings and opens the first backup-export password prompt; returns
+/// the tapped row's rect. Export awaits the screen's cache cleanup, which
+/// runs outside the fake clock.
+Future<Rect> openBackupExportPrompt(WidgetTester tester) async {
   final state = (await tester.runAsync(() async {
     final state = AppState(
       corpus: await loadRealCorpus(all: false),
@@ -51,10 +52,14 @@ Future<void> openBackupExportPrompt(WidgetTester tester) async {
     500,
     scrollable: find.byType(Scrollable).first,
   );
+  final row = tester.getRect(
+    find.ancestor(of: export, matching: find.byType(InkWell)).first,
+  );
   await tester.tap(export);
   await settleRealAsync(
     tester,
     () => find.byType(AlertDialog).evaluate().isNotEmpty,
   );
   expect(find.text(backupStrings('backupPassword')), findsOneWidget);
+  return row;
 }
