@@ -125,6 +125,7 @@ void main() {
       await state.savePersonalRecipe(second);
       await state.setRecipeImage(first.id, testPngBytes());
       final sent = <RecipeShareData>[];
+      final origins = <Rect>[];
       await tester.pumpWidget(
         shareApp(
           state,
@@ -132,17 +133,29 @@ void main() {
             recipeId: first.id,
             shareFiles: (bytes, text, origin) async {
               sent.add(decodeRecipeShare(bytes));
+              origins.add(origin);
               expect(text, isNot(contains('private profile')));
-              expect(origin.width, greaterThan(0));
             },
           ),
         ),
       );
-      await press(tester, 'share-selected-recipe');
+      // The iPad popover anchors to the tapped button, not the whole screen.
+      Future<Rect> pressAt(String key) async {
+        final button = find.byKey(ValueKey(key));
+        await tester.ensureVisible(button);
+        await tester.pumpAndSettle();
+        final rect = tester.getRect(button);
+        await press(tester, key);
+        return rect;
+      }
+
+      final selected = await pressAt('share-selected-recipe');
+      expect(origins.single, selected);
       expect(sent.single.recipes.map((r) => r.title), ['First recipe']);
       expect(sent.single.images, isEmpty);
       await press(tester, 'share-recipe-photos');
-      await press(tester, 'share-cookbook');
+      final cookbook = await pressAt('share-cookbook');
+      expect(origins.last, cookbook);
       expect(sent.last.recipes, hasLength(2));
       expect(sent.last.images, hasLength(1));
       expect(state.personalRecipes, hasLength(2));

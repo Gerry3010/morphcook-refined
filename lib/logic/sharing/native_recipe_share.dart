@@ -13,7 +13,8 @@ import '../local_file_bytes.dart';
 bool _shareInFlight = false;
 
 /// Hands one ZIP containing portable recipes and readable text to the OS.
-/// The OS offers installed destinations such as Bluetooth and Quick Share.
+/// The OS offers installed destinations such as Bluetooth and Quick Share on
+/// Android, or AirDrop on iOS.
 Future<void> shareRecipeFiles({
   required Uint8List jsonBytes,
   required String text,

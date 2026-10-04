@@ -5,13 +5,16 @@ hand-drawn-feeling chef's toque with the brand's diagonal terracotta stripes
 on its band. Run from app/:
 
     python3 tool/generate_icons.py
+    python3 tool/generate_icons.py --ios-only   # just the iOS app icon
 """
+import sys
 from pathlib import Path
 
 from PIL import Image, ImageChops, ImageDraw, ImageFont
 
 APP = Path(__file__).resolve().parent.parent
 RES = APP / "android/app/src/main/res"
+IOS_ICON = APP / "ios/Runner/Assets.xcassets/AppIcon.appiconset"
 STORE = APP.parent / "docs/store-assets"
 FONT = APP / "assets/fonts/PlayfairDisplay-Italic.ttf"
 
@@ -182,7 +185,18 @@ def feature_graphic() -> Image.Image:
     return img.resize((w, h), Image.LANCZOS)
 
 
+def ios_icon():
+    # Single-size asset catalog: iOS derives every size and applies its own
+    # squircle mask; App Store icons must be opaque, hence RGB.
+    IOS_ICON.mkdir(parents=True, exist_ok=True)
+    legacy_icon(1024).convert("RGB").save(IOS_ICON / "Icon-App-1024x1024@1x.png")
+    print(f"ios icon -> {IOS_ICON}")
+
+
 def main():
+    ios_icon()
+    if "--ios-only" in sys.argv[1:]:
+        return
     densities = {"mdpi": 1, "hdpi": 1.5, "xhdpi": 2, "xxhdpi": 3, "xxxhdpi": 4}
     for name, factor in densities.items():
         d = RES / f"mipmap-{name}"

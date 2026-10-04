@@ -14,6 +14,7 @@ import '../../logic/local_file_bytes.dart';
 import '../strings.dart';
 import '../theme.dart';
 import '../widgets/decor.dart';
+import '../widgets/share_origin.dart';
 import 'faq_screen.dart';
 import 'feedback_screen.dart';
 import 'insights_screen.dart';
@@ -275,10 +276,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
 
           SectionHeader(title: s('backup')),
-          _linkRow(
-            Icons.ios_share,
-            s('exportBackup'),
-            () => _exportBackup(state, s),
+          Builder(
+            builder: (row) => _linkRow(
+              Icons.ios_share,
+              s('exportBackup'),
+              () => _exportBackup(state, s, shareOriginOf(row)),
+            ),
           ),
           _linkRow(
             Icons.download_outlined,
@@ -617,7 +620,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // ---- backup ----
 
-  Future<void> _exportBackup(AppState state, S s) async {
+  /// [origin] is the tapped row: iPad presents the share sheet as a popover
+  /// anchored there; without an anchor share_plus refuses to share.
+  Future<void> _exportBackup(AppState state, S s, Rect origin) async {
     // Do not let stale-cache cleanup overlap creation of this export.
     await _startupCleanup;
     if (!mounted) return;
@@ -662,7 +667,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
       await withMorphCookShareFiles(
         () => SharePlus.instance.share(
-          ShareParams(files: files, subject: 'morphcook backup'),
+          ShareParams(
+            files: files,
+            subject: 'morphcook backup',
+            sharePositionOrigin: origin,
+          ),
         ),
       );
     } on DecryptionException catch (error) {
@@ -786,54 +795,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool obscure = false,
     bool allowEmpty = true,
   }) async {
-    final controller = TextEditingController(text: initial);
-    String? result;
-    try {
-      result = await showDialog<String>(
-        context: context,
-        builder: (context) {
-          final morph = MorphTheme.of(context);
-          return AlertDialog(
-            backgroundColor: morph.colors.paper,
-            title: Text(
-              label,
-              style: morph.text.display.copyWith(fontSize: 18),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: controller,
-                  obscureText: obscure,
-                  autofocus: true,
-                  style: morph.text.mono.copyWith(fontSize: 13),
-                ),
-                if (hint != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      hint,
-                      style: morph.text.handAt(15, color: morph.colors.inkSoft),
-                    ),
-                  ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(s('cancel'), style: morph.text.label()),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, controller.text),
-                child: Text('ok', style: morph.text.label()),
-              ),
-            ],
-          );
-        },
-      );
-    } finally {
-      controller.dispose();
-    }
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => _TextPromptDialog(
+        s: s,
+        initial: initial,
+        label: label,
+        hint: hint,
+        obscure: obscure,
+      ),
+    );
     if (result == null) return null;
     if (!allowEmpty && result.isEmpty) return null;
     return result;
@@ -890,5 +861,86 @@ class _SettingsScreenState extends State<SettingsScreen> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
+  }
+}
+
+/// Text prompt that owns its controller. showDialog completes as soon as the
+/// exit transition starts, while the closing dialog still builds its field
+/// and winds down text input; disposing the controller there trips "used
+/// after being disposed". State.dispose runs once the route is really gone.
+class _TextPromptDialog extends StatefulWidget {
+  final S s;
+  final String initial;
+  final String label;
+  final String? hint;
+  final bool obscure;
+
+  const _TextPromptDialog({
+    required this.s,
+    required this.initial,
+    required this.label,
+    this.hint,
+    this.obscure = false,
+  });
+
+  @override
+  State<_TextPromptDialog> createState() => _TextPromptDialogState();
+}
+
+class _TextPromptDialogState extends State<_TextPromptDialog> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initial);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final morph = MorphTheme.of(context);
+    final hint = widget.hint;
+    return AlertDialog(
+      backgroundColor: morph.colors.paper,
+      title: Text(
+        widget.label,
+        style: morph.text.display.copyWith(fontSize: 18),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: _controller,
+            obscureText: widget.obscure,
+            autofocus: true,
+            style: morph.text.mono.copyWith(fontSize: 13),
+          ),
+          if (hint != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                hint,
+                style: morph.text.handAt(15, color: morph.colors.inkSoft),
+              ),
+            ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(widget.s('cancel'), style: morph.text.label()),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, _controller.text),
+          child: Text('ok', style: morph.text.label()),
+        ),
+      ],
+    );
   }
 }

@@ -24,3 +24,19 @@ files. These assets supply the missing notices in the application package and
 the Flutter licenses page. The new runtime dependencies are open source Java
 libraries from Maven Central; the PDFBox dependency adds no native `.so` files
 or Google service dependency.
+
+# iOS CocoaPods notices
+
+On iOS the PDF importer uses Apple's PDFKit, so none of the PDFBox notices
+above ship there. Instead `file_picker` links these CocoaPods into the app
+(versions pinned by `ios/Podfile.lock`). Each file is the unaltered `LICENSE`
+from the pod at that tag; all are MIT.
+
+- `dkimagepickercontroller-LICENSE.txt`: DKImagePickerController 4.3.9,
+  https://github.com/zhangao0086/DKImagePickerController/tree/4.3.9
+- `dkphotogallery-LICENSE.txt`: DKPhotoGallery 0.0.19,
+  https://github.com/zhangao0086/DKPhotoGallery/tree/0.0.19
+- `sdwebimage-LICENSE.txt`: SDWebImage 5.21.7,
+  https://github.com/SDWebImage/SDWebImage/tree/5.21.7
+- `swiftygif-LICENSE.txt`: SwiftyGif 5.4.5,
+  https://github.com/kirualex/SwiftyGif/tree/5.4.5

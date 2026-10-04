@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// Bundled help text: reading or searching the manual requires no connection.
 class ManualSection {
   final String id;
@@ -6,16 +8,27 @@ class ManualSection {
   final String bodyEn;
   final String bodyDe;
 
+  /// iOS wording for sections that describe Android-only behaviour.
+  final String? iosBodyEn;
+  final String? iosBodyDe;
+
   const ManualSection({
     required this.id,
     required this.titleEn,
     required this.titleDe,
     required this.bodyEn,
     required this.bodyDe,
+    this.iosBodyEn,
+    this.iosBodyDe,
   });
 
   String title(String lang) => lang == 'de' ? titleDe : titleEn;
-  String body(String lang) => lang == 'de' ? bodyDe : bodyEn;
+  String body(String lang) {
+    final ios = defaultTargetPlatform == TargetPlatform.iOS;
+    return lang == 'de'
+        ? (ios ? iosBodyDe : null) ?? bodyDe
+        : (ios ? iosBodyEn : null) ?? bodyEn;
+  }
 
   bool matches(String query, String lang) {
     final search = query.trim().toLowerCase();
@@ -23,6 +36,12 @@ class ManualSection {
         '${title(lang)} ${body(lang)}'.toLowerCase().contains(search);
   }
 }
+
+const _sharingReceiveEn =
+    'On the receiving device, save the file and open the recipe-sharing screen in Cookbook to import the ZIP (or its recipe JSON). Review the preview and confirm adding the recipes. Existing recipes are retained; identical copies are skipped and changed copies are added separately. Sharing includes recipes, source links, and optional photos, but excludes your profile, meal plans, history, and private expert assessments. Use a full backup to transfer those personal records.';
+
+const _sharingReceiveDe =
+    'Speichere auf dem Empfangsgerät die Datei und öffne im Kochbuch die Rezept-Teilen-Seite zum Import der ZIP-Datei (oder ihrer Rezept-JSON). Prüfe die Vorschau und bestätige das Hinzufügen. Vorhandene Rezepte bleiben erhalten; identische Kopien werden übersprungen und geänderte Kopien separat ergänzt. Geteilt werden Rezepte, Quellenlinks und optionale Fotos. Profil, Essenspläne, Verlauf und private fachliche Einschätzungen bleiben ausgeschlossen. Nutze für diese persönlichen Daten ein vollständiges Backup.';
 
 const userManualSections = [
   ManualSection(
@@ -97,10 +116,16 @@ const userManualSections = [
     titleDe: 'Rezept oder Kochbuch teilen',
     bodyEn:
         'Use Share on a recipe page to share that recipe, or the sharing action in Cookbook for your saved and personal recipes. Choose whether to include photos. MorphCook opens the Android share sheet with one ZIP containing recipe data and a readable recipe text. Select Bluetooth, Quick Share, or another available target. Targets depend on your device; wait for a transfer to finish before starting another share.\n\n'
-        'On the receiving device, save the file and open the recipe-sharing screen in Cookbook to import the ZIP (or its recipe JSON). Review the preview and confirm adding the recipes. Existing recipes are retained; identical copies are skipped and changed copies are added separately. Sharing includes recipes, source links, and optional photos, but excludes your profile, meal plans, history, and private expert assessments. Use a full backup to transfer those personal records.',
+        '$_sharingReceiveEn',
     bodyDe:
         'Nutze Teilen auf einer Rezeptseite für dieses Rezept oder die Teilen-Funktion im Kochbuch für deine gespeicherten und eigenen Rezepte. Wähle, ob Fotos enthalten sein sollen. MorphCook öffnet das Android-Teilen-Menü mit einer ZIP-Datei aus Rezeptdaten und lesbarem Rezepttext. Wähle Bluetooth, Quick Share oder ein anderes verfügbares Ziel. Die Ziele hängen vom Gerät ab; warte das Ende einer Übertragung ab, bevor du erneut teilst.\n\n'
-        'Speichere auf dem Empfangsgerät die Datei und öffne im Kochbuch die Rezept-Teilen-Seite zum Import der ZIP-Datei (oder ihrer Rezept-JSON). Prüfe die Vorschau und bestätige das Hinzufügen. Vorhandene Rezepte bleiben erhalten; identische Kopien werden übersprungen und geänderte Kopien separat ergänzt. Geteilt werden Rezepte, Quellenlinks und optionale Fotos. Profil, Essenspläne, Verlauf und private fachliche Einschätzungen bleiben ausgeschlossen. Nutze für diese persönlichen Daten ein vollständiges Backup.',
+        '$_sharingReceiveDe',
+    iosBodyEn:
+        'Use Share on a recipe page to share that recipe, or the sharing action in Cookbook for your saved and personal recipes. Choose whether to include photos. MorphCook opens the iOS share sheet with one ZIP containing recipe data and a readable recipe text. Select AirDrop, Save to Files, or another available app. Targets depend on your device; wait for a transfer to finish before starting another share.\n\n'
+        '$_sharingReceiveEn',
+    iosBodyDe:
+        'Nutze Teilen auf einer Rezeptseite für dieses Rezept oder die Teilen-Funktion im Kochbuch für deine gespeicherten und eigenen Rezepte. Wähle, ob Fotos enthalten sein sollen. MorphCook öffnet das iOS-Teilen-Menü mit einer ZIP-Datei aus Rezeptdaten und lesbarem Rezepttext. Wähle AirDrop, „In Dateien sichern“ oder eine andere verfügbare App. Die Ziele hängen vom Gerät ab; warte das Ende einer Übertragung ab, bevor du erneut teilst.\n\n'
+        '$_sharingReceiveDe',
   ),
   ManualSection(
     id: 'planning',

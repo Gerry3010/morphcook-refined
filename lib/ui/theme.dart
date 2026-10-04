@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// MorphCook's warm paper, ink, terracotta, and teal cookbook look.
 ///
@@ -190,6 +191,18 @@ class MorphTheme extends InheritedWidget {
   bool updateShouldNotify(MorphTheme oldWidget) => oldWidget.data != data;
 }
 
+/// Status-bar style for content drawn on a background of [background]
+/// brightness. Like AppBar's own default it sets only status-bar fields, so
+/// Android's navigation bar keeps its system styling.
+SystemUiOverlayStyle statusBarStyleOn(Brightness background) {
+  final light = background == Brightness.light;
+  return SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarBrightness: background, // iOS
+    statusBarIconBrightness: light ? Brightness.dark : Brightness.light,
+  );
+}
+
 ThemeData morphThemeData(MorphColors colors, {bool readable = true}) {
   final base = ThemeData(
     useMaterial3: true,
@@ -216,6 +229,9 @@ ThemeData morphThemeData(MorphColors colors, {bool readable = true}) {
       foregroundColor: colors.ink,
       elevation: 0,
       centerTitle: true,
+      // Flutter estimates a transparent bar as dark and would pick light
+      // status-bar icons, which vanish on the light paper.
+      systemOverlayStyle: statusBarStyleOn(colors.brightness),
     ),
     dividerColor: colors.line,
     snackBarTheme: SnackBarThemeData(

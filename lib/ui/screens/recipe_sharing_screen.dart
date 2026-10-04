@@ -10,6 +10,7 @@ import '../../logic/sharing/native_recipe_share.dart';
 import '../../logic/sharing/recipe_share.dart';
 import '../../models/personal_recipe.dart';
 import '../strings.dart';
+import '../widgets/share_origin.dart';
 
 /// Explicit sharing and previewed imports of portable recipe files.
 class RecipeSharingScreen extends StatefulWidget {
@@ -64,19 +65,30 @@ class _RecipeSharingScreenState extends State<RecipeSharingScreen> {
                   : (value) => setState(() => _includeImages = value),
             ),
             if (widget.recipeId != null)
-              FilledButton.icon(
-                key: const ValueKey('share-selected-recipe'),
+              Builder(
+                builder: (button) => FilledButton.icon(
+                  key: const ValueKey('share-selected-recipe'),
+                  onPressed: _busy
+                      ? null
+                      : () => _share(
+                          state,
+                          s,
+                          shareOriginOf(button),
+                          recipeId: widget.recipeId,
+                        ),
+                  icon: const Icon(Icons.share_outlined),
+                  label: Text(s('shareRecipe')),
+                ),
+              ),
+            Builder(
+              builder: (button) => OutlinedButton.icon(
+                key: const ValueKey('share-cookbook'),
                 onPressed: _busy
                     ? null
-                    : () => _share(state, s, recipeId: widget.recipeId),
-                icon: const Icon(Icons.share_outlined),
-                label: Text(s('shareRecipe')),
+                    : () => _share(state, s, shareOriginOf(button)),
+                icon: const Icon(Icons.menu_book_outlined),
+                label: Text(s('shareCookbook')),
               ),
-            OutlinedButton.icon(
-              key: const ValueKey('share-cookbook'),
-              onPressed: _busy ? null : () => _share(state, s),
-              icon: const Icon(Icons.menu_book_outlined),
-              label: Text(s('shareCookbook')),
             ),
             const SizedBox(height: 24),
             Text(s('sharedImportHint')),
@@ -123,12 +135,14 @@ class _RecipeSharingScreenState extends State<RecipeSharingScreen> {
     );
   }
 
-  Future<void> _share(AppState state, S s, {String? recipeId}) async {
+  /// [origin] is the tapped button, the share sheet's popover anchor on iPad.
+  Future<void> _share(
+    AppState state,
+    S s,
+    Rect origin, {
+    String? recipeId,
+  }) async {
     if (_busy) return;
-    final renderBox = context.findRenderObject();
-    final origin = renderBox is RenderBox && renderBox.hasSize
-        ? renderBox.localToGlobal(Offset.zero) & renderBox.size
-        : const Rect.fromLTWH(0, 0, 1, 1);
     setState(() {
       _busy = true;
       _message = null;

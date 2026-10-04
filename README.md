@@ -1,5 +1,37 @@
 # MorphCook
 
+> [!IMPORTANT]
+> **iOS port fork — for testing only.** This is a fork of
+> [TheMorpheus407/morphcook-refined](https://github.com/TheMorpheus407/morphcook-refined)
+> that adds a working iOS implementation. It is not upstreamed.
+>
+> | | |
+> |---|---|
+> | Ported by | Claude Code, driven by Gerald Hofbauer |
+> | Model | Claude Opus 5.5 (`claude-opus-5-5`) |
+> | Thinking / effort level | `xhigh` (fast mode off) |
+> | Claude Code | 2.1.280 inside the Claude desktop app 2.2553.13 (Agent SDK 0.3.280), macOS 26.5.2 |
+> | Toolchain | Xcode 26.6 (17F113), Flutter 3.38.3 / Dart 3.10.1 (the pinned `submodules/flutter`), CocoaPods 1.16.2 |
+> | Verified on | iOS Simulator: iPhone 16 Pro (iOS 18.6), iPhone 17 Pro (iOS 26.5), iPhone SE 3rd gen (iOS 17.0) |
+> | Date | 2026-10-04 |
+>
+> **What the port adds:** native PDF text import via PDFKit/CoreGraphics on the
+> `morphcook/pdf_import` channel (same limits and error codes as the Android
+> PDFBox extractor, covered by XCTests), UIScene lifecycle, the real app icon,
+> a light/dark launch screen, EN/DE localization, a privacy manifest and the
+> bundle ID `net.geraldhofbauer.morphcook`. Shared code now names AirDrop
+> instead of Bluetooth/Quick Share on iOS, lists the iOS pods' licenses, and
+> keeps status-bar icons legible on every screen (on Android too).
+>
+> **Known iOS differences:** PDFKit can merge tightly-leaded lines (e.g. plain
+> text-to-PDF output), so such PDFs may fall back to the unstructured-text
+> import; browser- and ReportLab-generated recipe PDFs import fully structured.
+> Broken page content is reported as "no text" where Android says "invalid PDF".
+>
+> Build for iOS (after `git submodule update --init`):
+> `submodules/flutter/bin/flutter run -d <simulator>`; native
+> tests: `xcodebuild test -workspace ios/Runner.xcworkspace -scheme Runner -destination 'platform=iOS Simulator,name=iPhone 17 Pro'`.
+
 *The same dish exists for every body.*
 
 Recipe apps treat dietary needs as filters that remove dishes from the world:
@@ -62,6 +94,7 @@ Share one recipe from its details or the whole cookbook from the sharing screen.
 The ZIP includes readable text and importable recipe data, with optional photos.
 Recipients preview additions; their profile, plans and history stay private.
 Android offers Bluetooth, Quick Share and other installed compatible apps.
+iOS offers AirDrop, Save to Files and other apps in the share sheet.
 
 ## PDF import, manual and feedback
 

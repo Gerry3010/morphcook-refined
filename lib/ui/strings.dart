@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// App-chrome strings (corpus text is localized in the data files).
 /// Adding a language = adding entries here, never a schema change.
 class S {
@@ -596,6 +598,22 @@ class S {
     'missingMust': 'eins deiner Must-haves fehlt',
   };
 
-  String call(String key) =>
-      (lang == 'de' ? _de[key] : _en[key]) ?? _en[key] ?? key;
+  /// iOS wording where the default text names Android-only share targets
+  /// (Bluetooth file transfer, Quick Share).
+  static const _enIos = <String, String>{
+    "shareCookbookHint":
+        "Share all saved and personal recipes. Choose AirDrop or another available app in the system share sheet. The recipient can import the ZIP into MorphCook or unzip it to read the text file. Wait for a transfer to finish before sharing another file.",
+  };
+
+  static const _deIos = <String, String>{
+    "shareCookbookHint":
+        "Teile alle gespeicherten und eigenen Rezepte. Wähle AirDrop oder eine andere verfügbare App im Teilen-Menü. Empfänger können die ZIP-Datei in MorphCook importieren oder zum Lesen der Textdatei entpacken. Warte auf das Ende einer Übertragung, bevor du erneut teilst.",
+  };
+
+  String call(String key) {
+    final ios = defaultTargetPlatform == TargetPlatform.iOS
+        ? (lang == 'de' ? _deIos[key] : _enIos[key])
+        : null;
+    return ios ?? (lang == 'de' ? _de[key] : _en[key]) ?? _en[key] ?? key;
+  }
 }
