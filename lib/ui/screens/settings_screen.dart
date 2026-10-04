@@ -618,6 +618,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // ---- backup ----
 
   Future<void> _exportBackup(AppState state, S s) async {
+    // iPad presents the share sheet as a popover, which needs an anchor;
+    // without one share_plus refuses and the export reports a failure.
+    final renderBox = context.findRenderObject();
+    final origin = renderBox is RenderBox && renderBox.hasSize
+        ? renderBox.localToGlobal(Offset.zero) & renderBox.size
+        : const Rect.fromLTWH(0, 0, 1, 1);
     // Do not let stale-cache cleanup overlap creation of this export.
     await _startupCleanup;
     if (!mounted) return;
@@ -662,7 +668,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
       await withMorphCookShareFiles(
         () => SharePlus.instance.share(
-          ShareParams(files: files, subject: 'morphcook backup'),
+          ShareParams(
+            files: files,
+            subject: 'morphcook backup',
+            sharePositionOrigin: origin,
+          ),
         ),
       );
     } on DecryptionException catch (error) {
